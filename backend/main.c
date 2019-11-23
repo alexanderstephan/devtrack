@@ -115,7 +115,7 @@ int main(int argv, char** args){
   char path[256];
 
   //fp = popen("while true; do wmctrl -l | grep $(printf '%x' $(xdotool getwindowfocus)) && sleep 1; done", "r");
-  fp = popen("python3 process_pid.py", "r");
+  fp = popen("./get_pid", "r");
   if (fp == NULL) {
     printf("Failed to run command\n" );
     exit(1);
@@ -123,9 +123,9 @@ int main(int argv, char** args){
 
   while (fgets(path, sizeof(path), fp) != NULL) {
     path[strlen(path)-1]='\0';
-    if(strcmp(path+19, last_string))
-      head=insert_and_append(head, new_node(path+19));
-    strcpy(last_string, path+19);
+    if(strcmp(path, last_string))
+      head=insert_and_append(head, new_node(path));
+    strcpy(last_string, path);
     print_list(head);
   }
   
