@@ -114,7 +114,8 @@ int main(int argv, char** args){
   char last_string[256]="";
   char path[256];
 
-  fp = popen("while true; do wmctrl -l | grep $(printf '%x' $(xdotool getwindowfocus)) && sleep 1; done", "r");
+  //fp = popen("while true; do wmctrl -l | grep $(printf '%x' $(xdotool getwindowfocus)) && sleep 1; done", "r");
+  fp = popen("python3 process_pid.py", "r");
   if (fp == NULL) {
     printf("Failed to run command\n" );
     exit(1);
