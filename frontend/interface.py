@@ -21,37 +21,47 @@ def read_in_file(file, dic):
     print(dic)
 
 def draw_graph_1(win, arr):
-    #rechts.addstr(4,4,"TEST")
-    #rechts.addch(4,4,curses.ACS_BLOCK)
-    #rechts.addch(4,5,curses.ACS_BLOCK)
-    #rechts.addch(5,4,curses.ACS_BLOCK)
-    #rechts.addch(5,5,curses.ACS_BLOCK)
-
     maxy,maxx=win.getmaxyx()
     abstand=maxx/(len(arr)*2+1)
-    scale=arr[0]/(0.75*maxy)
-    win.addstr(3,20,(str)(scale))
-    win.addstr(4,20,(str)(abstand))
-    win.addstr(5,20,(str)(maxx))
-    win.addstr(6,20,(str)(maxy))
-    #win.addch(3,3,curses.ACS_BLOCK)
-    #win.addch(5,5,curses.ACS_BLOCK)
-    for i in range(len(arr)):
-        for j in range((int)(scale*i)):
-            for k in range()
-            win.addch(j+1,(int)(i*abstand),curses.ACS_BLOCK)
+    scale=(0.75*maxy)/arr[0]
+    for i,j in enumerate(arr):
+        for k in range((int)(abstand)):
+            for l in range((int)(scale*j)):
+                win.addch(maxy-2-l,k+(i*2*(int)(abstand)+1+(int)(abstand)),curses.ACS_BLOCK, curses.color_pair(2))
     win.refresh()
 
+def draw_graph_2(win, arr):
+    maxx,maxy=win.getmaxyx()
+    abstand=maxy/(len(arr)*2+1)
+    scale=(0.75*maxx)/arr[0]
+    for i,j in enumerate(arr):
+        for k in range((int)(abstand)):
+            for l in range((int)(scale*j)):
+                    win.addch(k+(i*2*(int)(abstand)+1+(int)(abstand)),l+1,curses.ACS_BLOCK,curses.color_pair(1))
+    win.refresh()
+
+
 file=open("/home/alex/devtrack/frontend/data")
+#lines=file.readlines()
+#print(lines)
+#time.sleep(10)
+#lines=file.readlines()
+#print(lines)
 dic={}
 read_in_file(file, dic)
 file.close()
 top_five=sorted(dic.values(),reverse=True)[:5]
 print(top_five)
 
-#time.sleep(2)
+#time.sleep(5)
 
 stdscr = curses.initscr()
+
+curses.start_color()
+curses.use_default_colors()
+curses.init_pair(1, curses.COLOR_RED, curses.COLOR_BLUE)
+curses.init_pair(2, curses.COLOR_BLUE, curses.COLOR_BLACK)
+
 
 curses.noecho()
 #curses.echo()
@@ -71,6 +81,7 @@ links.refresh()
 rechts.refresh()
 leiste.refresh()
 draw_graph_1(rechts, top_five)
+draw_graph_2(links, top_five)
 tb = curses.textpad.Textbox(actual_leiste)
 text = tb.edit()
 
