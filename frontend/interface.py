@@ -82,7 +82,7 @@ def draw_graph_2(win, arr, keys):
 def wrapper_read_in_file(readable_file, dic, delay, win):
     while True:
         read_in_file(readable_file, dic)
-        draw_graph_2(win, get_top_five(dic, 1))
+        draw_graph_2(win, get_top_five(dic, 0))
         actual_leiste.refresh()
         time.sleep(delay)
         
@@ -140,7 +140,7 @@ dic={}
 read_in_file(readable_file, dic)
 #file.close()
 #top_five=sorted(dic.values(),reverse=True)[:6]
-top_five=get_top_five(dic, 1)
+top_five=get_top_five(dic, 0)
 #print(top_five)
 #_thread.start_new_thread(wrapper_read_in_file, (readable_file, dic, 5, links, ))
 
@@ -150,6 +150,7 @@ draw_graph_2(links, top_five, get_top_five_keys(dic, top_five))
 
 global_l_offset=0
 global_r_offset=0
+global_vis_offset=0
 
 #text=(str)(actual_leiste.getstr(0,0, x).decode("UTF-8"))
 #while text!='quit' or text!='q' or text!=':q':
@@ -173,7 +174,7 @@ while True:
             curses.echo()
             actual_leiste.erase()
             read_in_file(readable_file, dic)
-            top_five=get_top_five(dic, 1)
+            top_five=get_top_five(dic, 0)
             draw_graph_1(rechts, top_five, get_top_five_keys(dic, top_five))
             draw_graph_2(links, top_five, get_top_five_keys(dic, top_five))
             actual_leiste.refresh()
@@ -193,14 +194,35 @@ while True:
         global_r_offset+=1
         redraw(dic, links, rechts)
     elif new_chr is ord('h'):
-    #elif new_chr is "h":# in text:
-    #elif ":h" in text:
         lx=links.getmaxyx()[1]
         rx=rechts.getmaxyx()[1]
         links=curses.newwin(y-3, lx-1, 0, 0)
         rechts=curses.newwin(y-3, rx+1, 0, (int)(x/2)+global_r_offset-1)
         global_r_offset-=1
         redraw(dic, links, rechts)
+    elif new_chr is ord('j'):
+        curses.echo()
+        actual_leiste.erase()
+        read_in_file(readable_file, dic)
+        #actual_leiste.addstr(0,0,str(len(list(dic.keys()))))
+        if global_vis_offset<len(list(dic.keys()))-6:
+            global_vis_offset+=1
+        top_five=get_top_five(dic, global_vis_offset)
+        draw_graph_1(rechts, top_five, get_top_five_keys(dic, top_five))
+        draw_graph_2(links, top_five, get_top_five_keys(dic, top_five))
+        actual_leiste.refresh()
+    elif new_chr is ord('k'):
+        curses.echo()
+        actual_leiste.erase()
+        read_in_file(readable_file, dic)
+        if global_vis_offset>0:
+            global_vis_offset-=1
+        else:
+            continue
+        top_five=get_top_five(dic, global_vis_offset)
+        draw_graph_1(rechts, top_five, get_top_five_keys(dic, top_five))
+        draw_graph_2(links, top_five, get_top_five_keys(dic, top_five))
+        actual_leiste.refresh()
     elif new_chr is "q":# in text:
         break
 
