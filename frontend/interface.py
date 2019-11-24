@@ -2,10 +2,22 @@ import curses
 import curses.textpad
 import time
 import _thread
+import sys
 import datetime
 from collections import OrderedDict
 #from time import gmtime, strftime
 
+def redraw(dic, links, rechts):
+    links.erase()
+    rechts.erase()
+    links.box()
+    rechts.box()
+    links.refresh()
+    rechts.refresh()
+    draw_graph_1(rechts, top_five, get_top_five_keys(dic, top_five))
+    draw_graph_2(links, top_five, get_top_five_keys(dic, top_five))
+    
+    curses.echo()
 
 def read_in_file(readable_file, dic):
     lines=readable_file.readlines()
@@ -36,9 +48,12 @@ def draw_graph_1(win, arr, keys):
                 win.addch(maxy-2-l,k+(i*2*(int)(abstand)+1+(int)(abstand)),curses.ACS_BLOCK, curses.color_pair(2))
                 
     
-    offset=(int)(maxx*0.75)
+    thingi='     '
+    offset=(int)(maxx*0.65)
     for i,j in enumerate(reversed(keys)):
-        win.addstr(2*i+2,offset,j)
+        thingi=thingi[:(5-len(str(arr[i])))]
+        win.addstr(2*i+2,offset+13-(len(j)),j+":"+thingi+(str)(arr[i])+"s")
+        thingi='     '
     #win.refresh()
     #win = curses.newwin(height, width, begin_y, begin_x)
     
@@ -67,22 +82,14 @@ def draw_graph_2(win, arr, keys):
 def wrapper_read_in_file(readable_file, dic, delay, win):
     while True:
         read_in_file(readable_file, dic)
-        draw_graph_2(win, get_top_five(dic))
+        draw_graph_2(win, get_top_five(dic, 1))
         actual_leiste.refresh()
         time.sleep(delay)
         
-def get_top_five(dic):
-    return sorted(dic.values(),reverse=True)[:5]
+def get_top_five(dic, offset):
+    return sorted(dic.values(),reverse=True)[offset:5+offset]
 
 def get_top_five_keys(dic, top_five):
-    # sorted_dict=OrderedDict(sorted(dic.items()))
-    # sorted_keys=list(reversed(sorted_dict.keys()))
-    # print(dic.items())
-    # print(sorted(dic.items()))
-    # print(dic)
-    # print(sorted_dict)
-    # print(sorted_keys)
-    # return sorted_keys[:5]
     return_arr=[]
     for i in top_five:
         for j in list(dic.keys()):
@@ -91,25 +98,9 @@ def get_top_five_keys(dic, top_five):
     return list(reversed(return_arr))
 
 
-
-cur_date=datetime.datetime.now().strftime('%Y %m %d').split(' ')
-cur_day=datetime.date((int)(cur_date[0]), (int)(cur_date[1]), (int)(cur_date[2])).strftime('%s')
-
-cur_file="/home/confringe/Hackatum/"+cur_day
-readable_file=open(cur_file)
-dic={}
-read_in_file(readable_file, dic)
-#file.close()
-#top_five=sorted(dic.values(),reverse=True)[:6]
-top_five=get_top_five(dic)
-#print(top_five)
-#_thread.start_new_thread(wrapper_read_in_file, (readable_file, dic, 5, links, ))
-get_top_five_keys(dic,top_five)
-
-#time.sleep(10)
-
-
 stdscr = curses.initscr()
+
+curses.curs_set(0)
 
 curses.start_color()
 curses.use_default_colors()
@@ -122,7 +113,7 @@ curses.noecho()
 
 y,x=stdscr.getmaxyx()
 links=curses.newwin(y-3, (int)(x/2), 0, 0)
-rechts=curses.newwin(y-3, (int)(x/2), 0, (int)(x/2))
+rechts=curses.newwin(y-3, (int)(x/2)+1, 0, (int)(x/2))
 leiste=curses.newwin(3,x-1,y-3,0)
 actual_leiste=curses.newwin(1,x-4,y-2,2)
 #win = curses.newwin(height, width, begin_y, begin_x)
@@ -136,6 +127,10 @@ rechts.refresh()
 leiste.refresh()
 
 
+curses.echo()
+
+
+
 cur_date=datetime.datetime.now().strftime('%Y %m %d').split(' ')
 cur_day=datetime.date((int)(cur_date[0]), (int)(cur_date[1]), (int)(cur_date[2])).strftime('%s')
 
@@ -145,26 +140,69 @@ dic={}
 read_in_file(readable_file, dic)
 #file.close()
 #top_five=sorted(dic.values(),reverse=True)[:6]
-top_five=get_top_five(dic)
+top_five=get_top_five(dic, 1)
 #print(top_five)
 #_thread.start_new_thread(wrapper_read_in_file, (readable_file, dic, 5, links, ))
-
 
 
 draw_graph_1(rechts, top_five, get_top_five_keys(dic, top_five))
 draw_graph_2(links, top_five, get_top_five_keys(dic, top_five))
 
-curses.echo()
-text=actual_leiste.getstr(0,0, x).decode()
+global_l_offset=0
+global_r_offset=0
+
+#text=(str)(actual_leiste.getstr(0,0, x).decode("UTF-8"))
 #while text!='quit' or text!='q' or text!=':q':
 #while bytes(":q") not in text and bytes("quit") not in text:
-while ":q" not in (str)(text) and "quit" not in str(text):
-    actual_leiste.erase()
-    append_file=open(cur_file, 'a');
-    append_file.write(datetime.datetime.now().strftime('%s')+" "+(str)(text)+"\n")
-    actual_leiste.refresh()
-    append_file.close()
-    text=actual_leiste.getstr(0,0, 15)
+curses.noecho()
+#new_chr=actual_leiste.getch()
+while True:
+    curses.curs_set(0)
+    curses.noecho()
+    new_chr=actual_leiste.getch()
+    if new_chr is ord(':'):
+        actual_leiste.addch(0,0,':')
+        curses.echo()
+        curses.curs_set(1)
+        text=(str)(actual_leiste.getstr(0,1, 15).decode("UTF-8"))
+        if text[0] is "q" or "quit" in text:
+            readable_file.close()
+            curses.endwin()
+            sys.exit()
+        elif "refresh" in text:
+            curses.echo()
+            actual_leiste.erase()
+            read_in_file(readable_file, dic)
+            top_five=get_top_five(dic, 1)
+            draw_graph_1(rechts, top_five, get_top_five_keys(dic, top_five))
+            draw_graph_2(links, top_five, get_top_five_keys(dic, top_five))
+            actual_leiste.refresh()
+        else:
+            actual_leiste.erase()
+            append_file=open(cur_file, 'a');
+            append_file.write(datetime.datetime.now().strftime('%s')+" "+text+"\n")
+            actual_leiste.refresh()
+            append_file.close()
+            #text=(str)(actual_leiste.getstr(0,0, 15))
+    #elif new_chr is "l":# in text:
+    elif new_chr is ord('l'):
+        lx=links.getmaxyx()[1]
+        rx=rechts.getmaxyx()[1]
+        links=curses.newwin(y-3, lx+1, 0, 0)
+        rechts=curses.newwin(y-3, (int)(x/2)-global_r_offset, 0, (int)(x/2)+global_r_offset+1)
+        global_r_offset+=1
+        redraw(dic, links, rechts)
+    elif new_chr is ord('h'):
+    #elif new_chr is "h":# in text:
+    #elif ":h" in text:
+        lx=links.getmaxyx()[1]
+        rx=rechts.getmaxyx()[1]
+        links=curses.newwin(y-3, lx-1, 0, 0)
+        rechts=curses.newwin(y-3, rx+1, 0, (int)(x/2)+global_r_offset-1)
+        global_r_offset-=1
+        redraw(dic, links, rechts)
+    elif new_chr is "q":# in text:
+        break
 
 #curses.addstr(4,1,text.encode('utf_8'))
 readable_file.close()
