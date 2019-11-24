@@ -85,8 +85,9 @@ def plot_graph(dictionary):
 
 while True:
     print("Plot the data you want to see")
-    print("apps (--pie) (--yesterday)              Show how long different apps have been opened")
-    print("categories (--pie) (--yesterday)       Show how long different categegories have been opened")
+    print("apps (--pie) (--yesterday)            Show how long different apps have been opened")
+    print("categories (--pie) (--yesterday)      Show how long different categegories have been opened")
+    print("compare                               Compare productivity today with yesterdays productivity")
     inp = input("")
     if "--yesterday" in inp:
         usage_time_dates, usage_times, category_time_dates = fetch_data("2_5391220104455264892")
@@ -101,6 +102,12 @@ while True:
         plot_graph(category_time_dates)
     elif inp == "categories --pie" or inp == "categories --pie --yesterday":
         plt.pie([x.total_seconds() for x in category_time_dates.values()], labels=category_time_dates.keys())
+    elif inp == "compare":
+        y_usage_time_dates, y_usage_times, y_category_time_dates = fetch_data("2_5391220104455264892")
+        if category_time_dates["Work"].total_seconds() > y_category_time_dates["Work"].total_seconds() * 1.5:
+            print("You worked way harder today than yesterday, congratulations!\n")
+        elif y_category_time_dates["Work"].total_seconds() > category_time_dates["Work"].total_seconds() * 1.5:
+            print("You lost in productivity. Give it your best!\n")
     elif inp == "exit":
         exit()
     else:
