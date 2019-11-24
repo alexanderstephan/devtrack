@@ -166,7 +166,9 @@ while True:
         curses.echo()
         curses.curs_set(1)
         text=(str)(actual_leiste.getstr(0,1, 15).decode("UTF-8"))
-        if text[0] is "q" or "quit" in text:
+        if text=="":
+            continue
+        elif text[0] is "q" or "quit" in text:
             readable_file.close()
             curses.endwin()
             sys.exit()
