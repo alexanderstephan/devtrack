@@ -126,20 +126,21 @@ int main(int argv, char** args){
     exit(1);
   }
 
-  struct sockaddr_storage client_addr;
-  unsigned int address_size=sizeof(client_addr);
-  int listener=open_socket();
-  bind_to_local_port(listener, 6699);
+  /* struct sockaddr_storage client_addr; */
+  /* unsigned int address_size=sizeof(client_addr); */
+  /* int listener=open_socket(); */
+  /* bind_to_local_port(listener, 6699); */
 
-  listen(listener, 10);
+  /* listen(listener, 10); */
   
-  int tempconn;
+  /* int tempconn; */
   
-  while(1){
-    tempconn=accept(listener, (struct sockaddr *) &client_addr, &address_size);
-    char *s="Hello World!\n";
-    printf("Thing: %i\n", send(tempconn, s, strlen(s), 0));
-  }
+  /* while(1){ */
+  /*   tempconn=accept(listener, (struct sockaddr *) &client_addr, &address_size); */
+  /*   char *s="Hello World!\n"; */
+  /*   printf("Thing: %i\n", send(tempconn, s, strlen(s), 0)); */
+  /* } */
+
 
   while(fgets(path, sizeof(path), fp) != NULL){
     path[strlen(path)-1]='\0';

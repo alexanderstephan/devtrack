@@ -1,13 +1,17 @@
 import curses
 import curses.textpad
 import time
+import _thread
+import datetime
+
+from time import gmtime, strftime
+
 
 def read_in_file(file, dic):
     lines=file.readlines()
-    #ts=(int)lines[0].split(" ")[0]
-    #act=i.split(" ")[1:]
+    if lines==[]:
+        return
 
-    # number, item
     s=" "
     for i,j in enumerate(lines[:-1]):
         split=j.split(" ")
@@ -18,9 +22,11 @@ def read_in_file(file, dic):
             dic[act]+=(int)(next_split[0])-ts
         else:
             dic[act]=(int)(next_split[0])-ts
-    print(dic)
+    #print(dic)
 
 def draw_graph_1(win, arr):
+    win.erase()
+    win.box()
     maxy,maxx=win.getmaxyx()
     abstand=maxx/(len(arr)*2+1)
     scale=(0.75*maxy)/arr[0]
@@ -31,36 +37,41 @@ def draw_graph_1(win, arr):
     win.refresh()
 
 def draw_graph_2(win, arr):
+    win.erase()
+    win.box()
     maxx,maxy=win.getmaxyx()
-    abstand=maxy/(len(arr)*2+1)
-    scale=(0.75*maxx)/arr[0]
+    abstand=maxx/(len(arr)*2+1)
+    scale=(0.75*maxy)/arr[0]
     for i,j in enumerate(arr):
         for k in range((int)(abstand)):
             for l in range((int)(scale*j)):
-                    win.addch(k+(i*2*(int)(abstand)+1+(int)(abstand)),l+1,curses.ACS_BLOCK,curses.color_pair(1))
+                #win.addch(maxy-2-l,k+(i*2*(int)(abstand)+1+(int)(abstand)),curses.ACS_BLOCK, curses.color_pair(2))
+                win.addch(k+(i*2*(int)(abstand)+1+(int)(abstand)),l+1,curses.ACS_BLOCK,curses.color_pair(1))
     win.refresh()
 
+def wrapper_read_in_file(file, dic, delay):
+    while True:
+        read_in_file(file, dic)
+        time.sleep(delay)
 
-file=open("/home/alex/devtrack/frontend/data")
-#lines=file.readlines()
-#print(lines)
-#time.sleep(10)
-#lines=file.readlines()
-#print(lines)
+cur_date=datetime.datetime.now().strftime('%Y %m %d').split(' ')
+cur_day=datetime.date((int)(cur_date[0]), (int)(cur_date[1]), (int)(cur_date[2])).strftime('%s')
+
+cur_file="/home/confringe/Hackatum/"+cur_day
+file=open(cur_file)
 dic={}
 read_in_file(file, dic)
-file.close()
-top_five=sorted(dic.values(),reverse=True)[:5]
-print(top_five)
-
-#time.sleep(5)
+#file.close()
+top_five=sorted(dic.values(),reverse=True)[:6]
+#print(top_five)
+_thread.start_new_thread(read_in_file, (file, dic, ))
 
 stdscr = curses.initscr()
 
 curses.start_color()
 curses.use_default_colors()
-curses.init_pair(1, curses.COLOR_RED, curses.COLOR_BLUE)
-curses.init_pair(2, curses.COLOR_BLUE, curses.COLOR_BLACK)
+curses.init_pair(1, curses.COLOR_RED, curses.COLOR_BLACK)
+curses.init_pair(2, curses.COLOR_GREEN, curses.COLOR_BLACK)
 
 
 curses.noecho()
@@ -82,12 +93,19 @@ rechts.refresh()
 leiste.refresh()
 draw_graph_1(rechts, top_five)
 draw_graph_2(links, top_five)
-tb = curses.textpad.Textbox(actual_leiste)
-text = tb.edit()
 
+curses.echo()
+text=actual_leiste.getstr(0,0, x).decode()
+#while text!='quit' or text!='q' or text!=':q':
+while ":q" not in (str)(text) and "quit" not in str(text):
+#while bytes(":q") not in text and bytes("quit") not in text:
+    actual_leiste.erase()
+    append_file=open(cur_file, 'a');
+    append_file.write(datetime.datetime.now().strftime('%s')+" "+text+"\n")
+    actual_leiste.refresh()
+    append_file.close()
+    text=actual_leiste.getstr(0,0, 15)
 
-#rechts.refresh()
-
-stdscr.getch()
 #curses.addstr(4,1,text.encode('utf_8'))
+file.close()
 curses.endwin()
