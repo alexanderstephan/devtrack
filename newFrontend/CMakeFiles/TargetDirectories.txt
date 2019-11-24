@@ -1,3 +1,0 @@
-/home/alex/devtrack/newFrontend/CMakeFiles/rebuild_cache.dir
-/home/alex/devtrack/newFrontend/CMakeFiles/newFrontend.dir
-/home/alex/devtrack/newFrontend/CMakeFiles/edit_cache.dir
